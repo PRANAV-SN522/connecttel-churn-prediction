@@ -1,0 +1,152 @@
+
+───────────────────────────────────────────────────────
+CONNECTTEL CHURN PREDICTION — BUSINESS INSIGHT REPORT
+Generated from XGBoost + SHAP Analysis (Week 4)
+───────────────────────────────────────────────────────
+
+MODEL PERFORMANCE SUMMARY
+─────────────────────────
+  Customers analysed      : 1,409
+    Predicted churners      : 524  (37.2% of customer base)
+      Top 5 churn drivers     : ContractRisk, tenure, InternetService_Fiber optic, TotalChargesPerTenure, MonthlyCharges
+
+───────────────────────────────────────────────────────
+FINDING 1 — CONTRACT TYPE IS THE DOMINANT CHURN DRIVER
+─────────────────────────────────────────────────────────
+  Evidence:
+      Mean |SHAP| for Contract_Month-to-month: 0.6922
+          Month-to-month customers have a SHAP value 2–3× higher than
+              any other contract type. This is the single largest lever.
+
+    Recommendation:
+        Launch a targeted "Lock-In" campaign offering Month-to-month
+            customers a 15% discount to upgrade to a 1-year contract.
+
+      Target segment:
+          All Month-to-month customers with tenure < 12 months
+              (highest SHAP values concentrated in this group).
+
+        Estimated impact:
+            If 20% of high-risk M2M customers accept: retention of
+                ~41 customers × $120/month
+                    = $5,030/month revenue protected.
+
+───────────────────────────────────────────────────────
+FINDING 2 — FIBER OPTIC + HIGH CHARGES = HIGHEST CHURN RISK
+─────────────────────────────────────────────────────────────
+  Evidence:
+      SHAP dependence plot (Figure 4) shows MonthlyCharges SHAP
+          values spike sharply above $65/month, and the interaction
+              colour confirms Fiber Optic users dominate this high-risk zone.
+                  Mean |SHAP| for MonthlyCharges: 0.2488
+
+    Recommendation:
+        Target Fiber Optic users paying > $65/month with a bundled
+            offer: add OnlineSecurity and TechSupport at no extra cost for
+                12 months. Both features show NEGATIVE SHAP values — adding
+                    them directly addresses the risk factors the model identified.
+
+      Target segment:
+          InternetService = Fiber Optic AND MonthlyCharges > $65
+              AND Contract = Month-to-month
+
+        Estimated impact:
+            Reducing churn in this segment by 25% saves approximately
+                $3,930/month.
+
+───────────────────────────────────────────────────────
+FINDING 3 — EARLY TENURE IS THE MOST CRITICAL VULNERABILITY
+─────────────────────────────────────────────────────────────
+  Evidence:
+      SHAP dependence plot (Figure 5) shows tenure has the strongest
+          NEGATIVE relationship with churn risk — customers in months 0–12
+              are far more likely to churn than customers past month 24.
+                  Mean |SHAP| for tenure: 0.4605
+
+    Recommendation:
+        Build an "Onboarding Excellence" programme for new customers:
+            • Month 1: personalised welcome + service setup check-in
+                • Month 3: satisfaction survey + proactive issue resolution
+                    • Month 6: loyalty reward (e.g. free upgrade or service add-on)
+                        • Month 9: early contract renewal offer (10% discount)
+
+      Target segment:
+          All customers with tenure <= 12 months.
+
+        Estimated impact:
+            Reducing first-year churn by 15% retains ~78
+                additional customers — $9,432/month.
+
+───────────────────────────────────────────────────────
+FINDING 4 — SERVICE ENGAGEMENT IS A STRONG RETENTION SIGNAL
+─────────────────────────────────────────────────────────────
+  Evidence:
+      ServiceCount shows strong negative SHAP values — customers
+          subscribed to 4+ add-on services churn at approximately half
+              the rate of single-service customers. The model uses this as
+                  a proxy for "invested customer."
+
+    Recommendation:
+        Upsell low-ServiceCount customers on 1–2 additional services
+            at a trial rate (first 3 months free). Once a customer uses
+                3+ services, their churn probability drops significantly.
+
+      Target segment:
+          ServiceCount <= 2 AND Contract = Month-to-month.
+
+───────────────────────────────────────────────────────
+FINDING 5 — PAPERLESS BILLING IS A CHURN RISK FLAG
+─────────────────────────────────────────────────────────────
+  Evidence:
+      PaperlessBilling = Yes has a positive SHAP value across the
+          dataset. While not causal (paperless customers may simply be
+              more tech-savvy and comparison-shopping), the model consistently
+                  uses it as a risk indicator.
+
+    Recommendation:
+        Use PaperlessBilling as a trigger for enhanced digital
+            engagement: in-app retention messaging, proactive chat support,
+                and personalised pricing comparison tools that frame ConnectTel
+                    as competitive — before the customer finds a competitor.
+
+───────────────────────────────────────────────────────
+SEGMENT PRIORITY MATRIX
+─────────────────────────────────────────────────────────────
+                          avg_churn_prob  pct_high_risk  n_customers
+segment                                                             
+Long-term + High charges            0.49          52.07          701
+Long-term + Low charges             0.26          22.46          708
+
+───────────────────────────────────────────────────────
+COST-BENEFIT SUMMARY
+─────────────────────────────────────────────────────────────
+  Retention offer cost per customer           : $25
+    Average monthly LTV per retained customer   : $120
+      Minimum months to break even on offer       : 0.2 months
+
+    At the recommended threshold (0.35–0.40):
+        Estimated customers flagged for outreach  : 633
+            Expected true positives (real churners)   : ∼392
+                Campaign cost                             : $15,825
+                    Expected revenue protected (12 months)   : $565,142
+                        Estimated ROI                             : 3471%
+
+───────────────────────────────────────────────────────
+MODEL LIMITATIONS & CAVEATS
+─────────────────────────────────────────────────────────────
+  1. Correlation vs causation: SHAP shows which features the model
+      uses, not why customers churn. Fibre Optic users may churn
+          because of price, network quality, or competition — the model
+              cannot distinguish these from observational data alone.
+
+    2. Offer acceptance is not guaranteed. The revenue estimates
+        above assume a 20–25% offer acceptance rate. A/B testing is
+            required to validate the retention campaign's true effectiveness.
+
+    3. Model drift: customer behaviour and competitor landscape change.
+        Retrain this model quarterly on fresh data.
+
+    4. Class imbalance handling: scale_pos_weight up-weights churners
+        but may generate more false positives. Monitor Precision in
+            production to avoid over-alerting the retention team.
+───────────────────────────────────────────────────────
